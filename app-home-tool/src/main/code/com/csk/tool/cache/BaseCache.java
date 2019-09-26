@@ -5,6 +5,7 @@ public abstract class BaseCache implements ICache {
 	        return get(key)!=null;
 	  }
 	  public  <T> T getT(String key) {
+		  //123
 	        Object obj = get(key);
 	        return obj == null ? null : (T) obj;
 	  } 
