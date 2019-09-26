@@ -1,0 +1,177 @@
+<?xml version="1.0"?>
+<!--   
+xmlns="http://www.w3school.com.cn"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.w3school.com.cn test.xsd"
+ -->
+ <!-- 父节点 childs   -->
+ <!--  
+ 		childs 可解析多个节点的数据 集ol 和 ul 
+ 			解析父节点的html数据  拆分出对应的数据集 	
+ 	<html>
+ 		<head>
+ 		</head>
+ 		<body>
+ 			<ul>
+ 				<li>名称</li>
+ 				<li>测试</li>
+ 			</ul>
+ 			<ol>
+ 				<li>测试</li>
+ 				<li>测试1</li>
+ 			</ol>
+ 		</body>
+ 	</html>
+ 	ul li 数据 应当由子节点分析
+ 	
+ -->
+<reptiles>
+	
+	<applicationContext>
+		<cache>
+			<cache-class>com.csk.collection.reptile.cache.impl.FileReotileCacheClient</cache-class>
+			<!-- 配置缓存的数据 -->
+			<value>e:\test\cache\</value>
+		</cache> 
+	</applicationContext>
+		 
+		<!-- 
+			节点缓存区
+		 -->
+		  
+	 <reptile> 
+	 	<url>https://www.qiushuzw.com/quanben/</url>
+	 	<data></data> 
+	 	<childs> 
+	 		<reptile> 
+	 		 	<matching>
+				 	<matchingType>ListString</matchingType>
+				 	<type>jsoup</type>
+				 	<value>.quanben li</value>
+				 </matching>
+				<matchingData> 
+					<matching>
+						<matchingType>String</matchingType>
+					 	<type>jsoup</type>
+					 	<value>a</value>
+					 	<name>title</name>
+					 	<handlers>
+					 		<!--  处理器 -->
+					 		<handler>
+					 			<handler-class>com.csk.collection.reptile.handler.impl.TrimHandler</handler-class> 
+					 		</handler> 
+					 	</handlers>
+				 	</matching>
+				 	<matching>
+				 		<matchingType>String</matchingType>
+				 		<type>jsoup</type>
+				 		<value>a</value>
+				 		<name>id</name>
+				 		<target>href</target>
+				 		<handlers>
+				 			<handler-class>com.csk.collection.reptile.handler.impl.TrimHandler</handler-class>
+				 			<handler>
+					 			<handler-class>com.csk.collection.reptile.handler.impl.RegularHandler</handler-class> 
+					 			<value>\d+</value>
+					 		</handler> 
+					 	</handlers>
+				 	</matching>
+				</matchingData>
+		 		<url>https://www.qiushuzw.com/t/{$param.id}/</url> 
+		 		<key> 
+					<key>{$param.id}.db</key>
+					<!-- 缓存一天 -->
+			 		<time>86400000</time>
+			 	</key>
+			 	<childs> 
+			 		<reptile> 
+			 			 <matching>
+						 	<matchingType>ListString</matchingType>
+						 	<type>jsoup</type>
+						 	<value>.book_con_list ul li</value>
+						 </matching>
+						 <matchingData> 
+						 	<matching>
+						 		<matchingType>String</matchingType>
+						 		<type>jsoup</type>
+						 		<value>a</value>
+						 		<name>id</name>
+						 		<target>href</target>
+						 		<handlers>
+						 			<handler-class>com.csk.collection.reptile.handler.impl.TrimHandler</handler-class>
+						 			<handler>
+							 			<handler-class>com.csk.collection.reptile.handler.impl.RegularHandler</handler-class> 
+							 			<value>\d+</value>
+							 		</handler> 
+							 	</handlers>
+						 	</matching> 
+						 </matchingData>
+						 <url>https://www.qiushuzw.com/t/{$paran.$param.id}/{$param.id}.html</url>
+						 <key> 
+							<key>{$paran.$param.id}/{$param.id}.db</key> 
+					 	</key>
+					 	<data>
+					 		<matching>
+					 			<matchingType>String</matchingType>
+						 		<type>jsoup</type>
+						 		<value>.book_content</value>
+						 		<name>content</name> 
+						 		<handlers>
+						 			<handler-class>com.csk.collection.reptile.handler.impl.TrimHandler</handler-class> 
+							 	</handlers>
+					 		</matching>
+					 		<matching>
+						 		<matchingType>String</matchingType>
+						 		<type>jsoup</type>
+						 		<value>.tit2 .date h1</value>
+						 		<name>title</name> 
+						 		<target>text</target> 
+						 		<handlers>
+						 			<handler-class>com.csk.collection.reptile.handler.impl.TrimHandler</handler-class> 
+							 	</handlers>
+						 	</matching>
+					 	</data> 
+					 	<handler-events>
+					 	<!--  
+					 		<handler-event> 
+					 			<handler-event-class>com.csk.collection.reptile.handlerevent.impl.HandlerEventLog</handler-event-class>
+					 			<handler-event-type>DATA_HANDLE_AFTER</handler-event-type>  
+					 		</handler-event>
+					 		 -->
+					 		<handler-event> 
+					 			<handler-event-class>com.csk.collection.reptile.handlerevent.impl.HandlerEventJDBC</handler-event-class>
+					 			<handler-event-type>DATA_HANDLE_AFTER</handler-event-type>   
+					 			<jdbc>
+					 				<name>root</name>
+					 				<url>jdbc:mysql://127.0.0.1:3306/article</url>
+					 				<password>root</password>
+					 				<driver-class-name>com.mysql.jdbc.Driver</driver-class-name>
+					 			</jdbc>
+					 			<table name="test">
+					 				<field>
+					 					<name>pid</name>
+					 					<value>$paran.$param.id</value>
+					 				</field>
+					 				<field>
+					 					<name>cid</name>
+					 					<value>$param.id</value>
+					 				</field>
+					 				<field>
+					 					<name>title</name>
+					 					<value>title</value>
+					 				</field>
+					 				
+					 				<field>
+					 					<name>content</name>
+					 					<value>content</value>
+					 				</field>
+					 			</table>
+					 		</handler-event>
+					 		
+					 	</handler-events>
+			 		</reptile>
+			 	</childs>
+	 		</reptile>
+	 	</childs>
+	 </reptile>
+</reptiles>
